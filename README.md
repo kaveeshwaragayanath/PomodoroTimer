@@ -1,5 +1,9 @@
+
 # PomodoroTimer
 ## Pomodoro Timer
+
+![WhatsApp Image 2023-09-04 at 14 00 01](https://github.com/kaveeshwaragayanath/PomodoroTimer/assets/125355380/fd4fa672-c93d-4d5e-8508-339a54919298)
+![WhatsApp Image 2023-09-04 at 13 59 55 (1)](https://github.com/kaveeshwaragayanath/PomodoroTimer/assets/125355380/2d13af92-bdec-4adb-9544-062293bb6ac6)
 
 The Pomodoro Technique is a highly effective time management method that enhances productivity by breaking work into focused 25-minute intervals (Pomodoros) followed by short 5-minute breaks. To help you make the most of this technique, we've designed the Pomodoro Timer – a versatile time management tool tailored for efficient study and work sessions.
 
