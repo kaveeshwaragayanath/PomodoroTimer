@@ -1,0 +1,178 @@
+Docs
+sketch.ino
+diagram.json
+libraries.txt
+Library Manager
+
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <DHT.h> // Include the DHT library
+
+#define OLED_RESET -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); // Initialize the OLED display library
+
+const int TIMER_PIN = 2; // the pin number for the timer output
+const int BUZZER_PIN = 17; // Pin connected to the buzzer
+const int TIMER_INTERVAL_MS = 1000; // timer interval in milliseconds
+const int TIME_SLOT_MINUTES = 3; // time slot in minutes
+const int TIME_SLOT_INTERVAL = 2; // interval time slot in minutes
+int stage = 0; // to swap between two stages
+volatile unsigned long previousMillis = 0; // previous time in milliseconds
+volatile int secondsCounter = 0; // counter for elapsed seconds
+volatile bool timerExpired = false; // flag for timer expiry
+
+// DHT22 Sensor
+#define DHT_PIN 12 // Pin connected to DHT22 sensor
+#define DHT_TYPE DHT22 // DHT sensor type
+DHT dht(DHT_PIN, DHT_TYPE); // Initialize the DHT sensor library
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(TIMER_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(15, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(23, OUTPUT);
+
+  dht.begin(); // Initialize the DHT sensor
+
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Initialize the OLED display
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(2);
+  display.setCursor(0, 0);
+  display.print("Time: 0:00");
+  display.display();
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= TIMER_INTERVAL_MS) {
+    previousMillis = currentMillis;
+    if (stage == 0) {
+      secondsCounter++;
+      if (secondsCounter >= TIME_SLOT_MINUTES * 60) {
+        // timer has expired
+        digitalWrite(TIMER_PIN, LOW);
+        timerExpired = true;
+      }
+
+      updateDisplay();
+      if (timerExpired) {
+        // timer has expired, do something here
+        stage = 1;
+        secondsCounter = 0;
+        timerExpired = false;
+        activateBuzzer();
+      }
+    }
+    if (stage == 1) {
+      secondsCounter++;
+      if (secondsCounter >= TIME_SLOT_INTERVAL * 60) {
+        // timer has expired
+        digitalWrite(TIMER_PIN, LOW);
+        timerExpired = true;
+      }
+
+      updateDisplay();
+      if (timerExpired) {
+        // timer has expired, do something here
+        stage = 2;
+        secondsCounter = 0;
+        timerExpired = false;
+        activateBuzzer();
+      }
+    }
+  }
+}
+
+void updateDisplay() {
+  int minutes = secondsCounter / 60;
+  int seconds = secondsCounter % 60;
+  
+  // Read temperature from the DHT22 sensor
+  float temperature = dht.readTemperature();
+
+  display.setCursor(0, 0);
+  display.print("Time: ");
+  display.print(minutes);
+  
+  // Display temperature below the time
+  //display.setCursor(0, 40);
+  //display.print("Temp: ");
+  //display.print(temperature);
+  //display.print("C");
+  
+  if (minutes > 5.0) {
+    digitalWrite(15, LOW);
+    digitalWrite(2, LOW);
+    digitalWrite(4, LOW);
+    digitalWrite(5, LOW);
+    digitalWrite(23, LOW);
+  }
+  else if (minutes >= 5.0) {
+    digitalWrite(15, HIGH);
+    digitalWrite(2, HIGH);
+    digitalWrite(4, HIGH);
+    digitalWrite(5, HIGH);
+    digitalWrite(23, HIGH);
+  }
+  else if (minutes >= 4.0) {
+    digitalWrite(15, HIGH);
+    digitalWrite(2, HIGH);
+    digitalWrite(4, HIGH);
+    digitalWrite(5, HIGH);
+    digitalWrite(23, LOW);
+  }
+  else if (minutes >= 3.0) {
+    digitalWrite(15, HIGH);
+    digitalWrite(2, HIGH);
+    digitalWrite(4, HIGH);
+    digitalWrite(5, LOW);
+    digitalWrite(23, LOW);
+  }
+  else if (minutes >= 2.0) {
+    digitalWrite(15, HIGH);
+    digitalWrite(2, HIGH);
+    digitalWrite(4, LOW);
+    digitalWrite(18, LOW);
+    digitalWrite(19, LOW);
+  }
+  else if (minutes >= 1.0) {
+    digitalWrite(15, HIGH);
+    digitalWrite(2, LOW);
+    digitalWrite(4, LOW);
+    digitalWrite(5, LOW);
+    digitalWrite(23, LOW);
+  }
+
+  display.print(":");
+  if (seconds < 10) {
+    display.print("0");
+  }
+  display.print(seconds);
+  //display.display();
+
+
+  // Display temperature below the time
+  display.setCursor(0, 20);
+  display.print("Temp: ");
+  display.print(temperature);
+  display.print("C");
+  display.display();
+  display.clearDisplay();
+}
+
+void activateBuzzer() {
+  digitalWrite(BUZZER_PIN, HIGH); // Turn on the buzzer
+  delay(3000); // Wait for 3 seconds
+  digitalWrite(BUZZER_PIN, LOW); // Turn off the buzzer
+  Serial.println("dbnhcbhbwvef");
+}
+Simulation
